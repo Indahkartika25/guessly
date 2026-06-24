@@ -21,24 +21,17 @@ let mentorDatabases = {
 // DATABASE KUIS PUBLIK (Discover)
 let publicQuizzes = [
   { 
-    id: "kuis_umum1", title: "Pengetahuan Umum SD", category: "Umum", author: "Admin", 
+    id: "kuis_umum1", title: "Pengetahuan Umum SD", category: "Umum", author: "admin", 
     questions: [
       { q: "Ibukota negara Indonesia?", a: "JAKARTA" },
       { q: "Planet terdekat dari matahari?", a: "MERKURIUS" }
     ]
   },
   { 
-    id: "kuis_sejarah1", title: "Sejarah Kemerdekaan", category: "Sejarah", author: "Pak Budi", 
+    id: "kuis_sejarah1", title: "Sejarah Kemerdekaan", category: "Sejarah", author: "pak budi", 
     questions: [
       { q: "Bulan kemerdekaan Indonesia?", a: "AGUSTUS" },
       { q: "Siapa proklamator kita selain Hatta?", a: "SOEKARNO" }
-    ]
-  },
-  { 
-    id: "kuis_ipa1", title: "Biologi Dasar", category: "IPA", author: "Bu Siska", 
-    questions: [
-      { q: "Pusat tata surya kita?", a: "MATAHARI" },
-      { q: "Hewan pemakan daging disebut?", a: "KARNIVORA" }
     ]
   }
 ];
@@ -50,15 +43,58 @@ app.get('/api/discover', (req, res) => {
   res.json(publicQuizzes);
 });
 
-// API MENTOR: Ambil Soal
+// API MENTOR: Ambil Riwayat Kuis yang sudah di-publish oleh mentor tertentu
+app.get('/api/publish/history/:username', (req, res) => {
+  const user = req.params.username.toLowerCase();
+  const history = publicQuizzes.filter(q => q.author.toLowerCase() === user);
+  res.json(history);
+});
+
+// API MENTOR: Hapus Kuis dari Discover (Hanya bisa dihapus oleh pemiliknya)
+app.delete('/api/publish/:username/:quizId', (req, res) => {
+  const { username, quizId } = req.params;
+  const index = publicQuizzes.findIndex(q => q.id === quizId && q.author.toLowerCase() === username.toLowerCase());
+  
+  if (index !== -1) {
+    publicQuizzes.splice(index, 1);
+    return res.json({ success: true, message: "Kuis berhasil dihapus dari Discover!" });
+  }
+  res.status(404).json({ error: "Kuis tidak ditemukan atau Anda bukan pemilik kuis ini!" });
+});
+
+// API MENTOR: Publish ke Discover (Public)
+app.post('/api/publish/:username', (req, res) => {
+  const user = req.params.username.toLowerCase();
+  const { title, category } = req.body;
+
+  if (!mentorDatabases[user] || mentorDatabases[user].length === 0) {
+    return res.status(400).json({ error: "Tidak ada soal untuk dipublish!" });
+  }
+  if (!title || !category) {
+    return res.status(400).json({ error: "Judul dan Kategori harus diisi!" });
+  }
+
+  const newQuiz = {
+    id: "quiz_" + Date.now(),
+    title: title,
+    category: category,
+    author: user,
+    questions: [...mentorDatabases[user]]
+  };
+
+  publicQuizzes.push(newQuiz);
+  res.json({ success: true, message: "Kuis berhasil dipublish!" });
+});
+
+// API MENTOR: Ambil Soal Bank Lokal
 app.get('/api/questions/:username', (req, res) => {
-  const user = req.params.username;
+  const user = req.params.username.toLowerCase();
   res.json(mentorDatabases[user] || []);
 });
 
 // API MENTOR: Tambah 1 Soal Manual
 app.post('/api/questions/:username', (req, res) => {
-  const user = req.params.username;
+  const user = req.params.username.toLowerCase();
   const { q, a } = req.body;
   if (!mentorDatabases[user]) mentorDatabases[user] = [];
   
@@ -71,7 +107,7 @@ app.post('/api/questions/:username', (req, res) => {
 
 // API MENTOR: Bulk Upload via TXT
 app.post('/api/questions/bulk/:username', (req, res) => {
-  const user = req.params.username;
+  const user = req.params.username.toLowerCase();
   const { questions } = req.body;
   if (!mentorDatabases[user]) mentorDatabases[user] = [];
   
@@ -89,9 +125,9 @@ app.post('/api/questions/bulk/:username', (req, res) => {
   res.status(400).json({ error: "Data tidak valid" });
 });
 
-// API MENTOR: Hapus Soal
+// API MENTOR: Hapus Soal Bank Lokal
 app.delete('/api/questions/:username/:index', (req, res) => {
-  const user = req.params.username;
+  const user = req.params.username.toLowerCase();
   const index = parseInt(req.params.index);
   if (mentorDatabases[user] && index >= 0 && index < mentorDatabases[user].length) {
     mentorDatabases[user].splice(index, 1);
@@ -102,13 +138,16 @@ app.delete('/api/questions/:username/:index', (req, res) => {
 
 // SOCKET IO ENGINE
 io.on('connection', (socket) => {
+  
   socket.on('createRoom', (mentorUsername) => {
     let roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    if (!mentorDatabases[mentorUsername]) mentorDatabases[mentorUsername] = [];
+    const user = mentorUsername.toLowerCase();
+    if (!mentorDatabases[user]) mentorDatabases[user] = [];
 
     activeRooms[roomCode] = {
       hostId: socket.id,
-      mentorName: mentorUsername,
+      mentorName: user,
+      isDiscoverRoom: false,
       players: {},
       gameStarted: false,
       questions: [],
@@ -120,6 +159,31 @@ io.on('connection', (socket) => {
     socket.emit('roomCreated', roomCode);
   });
 
+  // SOCKET: Siswa membuat room mandiri dari Discover (Multiplayer tanpa mentor)
+  socket.on('createDiscoverRoom', ({ quizId, playerName }) => {
+    let roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const quiz = publicQuizzes.find(q => q.id === quizId);
+    if (!quiz) return socket.emit('joinError', "Kuis tidak ditemukan!");
+
+    activeRooms[roomCode] = {
+      hostId: socket.id, // Siswa yang membuat bertindak sebagai host pemicu
+      isDiscoverRoom: true,
+      quizTitle: quiz.title,
+      players: {},
+      gameStarted: false,
+      questions: [...quiz.questions].sort(() => Math.random() - 0.5).slice(0, 5),
+      currentQuestionIndex: 0,
+      timer: 0,
+      intervalId: null
+    };
+
+    // Otomatis masukkan siswa pembuat room sebagai pemain pertama
+    activeRooms[roomCode].players[socket.id] = { name: playerName, score: 0, answered: false };
+    socket.join(roomCode);
+
+    socket.emit('discoverRoomCreated', { roomCode, playerName, quizTitle: quiz.title });
+  });
+
   socket.on('joinRoom', ({ roomCode, playerName }) => {
     const room = activeRooms[roomCode];
     if (!room) return socket.emit('joinError', "Game PIN tidak ditemukan!");
@@ -129,18 +193,30 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
     
     socket.emit('joinSuccess', { roomCode, playerName });
+    
+    // Kirim pembaruan daftar ke host room (bisa mentor ataupun siswa host)
     io.to(room.hostId).emit('updatePlayerList', Object.values(room.players).map(p => p.name));
   });
 
   socket.on('startGame', (roomCode) => {
     const room = activeRooms[roomCode];
-    if (room && room.hostId === socket.id) {
+    if (room && room.hostId === socket.id && !room.isDiscoverRoom) {
       room.gameStarted = true;
       let myQuestions = mentorDatabases[room.mentorName] || [];
       room.questions = [...myQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
       room.currentQuestionIndex = 0;
 
       if (room.questions.length === 0) return socket.emit('errorMsg', "Bank soal kosong! Isi di panel Admin.");
+      sendQuestion(roomCode);
+    }
+  });
+
+  // SOCKET: Mulai permainan untuk mode Discover Multiplayer Mandiri
+  socket.on('startDiscoverGame', (roomCode) => {
+    const room = activeRooms[roomCode];
+    if (room && room.hostId === socket.id && room.isDiscoverRoom) {
+      room.gameStarted = true;
+      if (room.questions.length === 0) return socket.emit('joinError', "Kuis tidak memiliki soal!");
       sendQuestion(roomCode);
     }
   });

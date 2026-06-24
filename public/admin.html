@@ -27,6 +27,7 @@
         Database milik: <span id="displayAdminUser"></span>
       </div>
 
+      <!-- FITUR UPLOAD FILE TXT -->
       <div class="kahoot-card wide" style="margin-bottom: 25px;">
         <h3>Upload Soal via .txt</h3>
         <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Format per baris: <strong>Pertanyaan | Jawaban</strong></p>
@@ -34,6 +35,7 @@
         <button id="btnUploadTxt" class="kahoot-btn btn-blue" style="margin-top: 10px;">Upload File</button>
       </div>
 
+      <!-- FITUR TAMBAH MANUAL -->
       <div class="kahoot-card wide" style="margin-bottom: 25px;">
         <h3>Buat Soal Baru (Manual)</h3>
         <input type="text" id="newQuestion" placeholder="Pertanyaan">
@@ -42,8 +44,24 @@
         <p id="adminError" class="error-text"></p>
       </div>
 
+      <!-- FITUR PUBLISH KE DISCOVER -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px; border: 2px solid #46178f;">
+        <h3 style="color: #46178f;">Publish ke Discover (Public)</h3>
+        <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Jadikan kumpulan soalmu sebagai kuis publik agar bisa dimainkan semua orang di menu Discover!</p>
+        <input type="text" id="publishTitle" placeholder="Judul Kuis (misal: Latihan Sejarah Kelas 6)">
+        <input type="text" id="publishCategory" placeholder="Kategori (misal: Sejarah, IPA, Umum)">
+        <button id="btnPublish" class="kahoot-btn" style="margin-top: 10px; background: #46178f; box-shadow: 0 4px 0 #2a0b5c; color: white;">Publish Sekarang</button>
+      </div>
+
+      <!-- BAGIAN RIWAYAT PUBLISH MENTOR -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px; border: 2px solid #1368ce;">
+        <h3 style="color: #1368ce;">Riwayat Publish Saya</h3>
+        <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Daftar kuis Anda yang saat ini aktif di menu publik Discover.</p>
+        <ul id="publishHistoryList" class="admin-list"></ul>
+      </div>
+
       <div class="kahoot-card wide">
-        <h3>Daftar Soal Saya</h3>
+        <h3>Daftar Soal Saya (Bank Lokal)</h3>
         <ul id="questionList" class="admin-list"></ul>
       </div>
     </div>

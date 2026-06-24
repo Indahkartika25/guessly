@@ -110,12 +110,8 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
   flex-wrap: wrap; 
 }
 .box {
-  width: 8vw;
-  max-width: 45px; 
-  height: 8vw;
-  max-height: 45px;
-  font-size: calc(1rem + 1vw); 
-  background: white; font-weight: 900;
+  width: 8vw; max-width: 45px; height: 8vw; max-height: 45px;
+  font-size: calc(1rem + 1vw); background: white; font-weight: 900;
   display: flex; justify-content: center; align-items: center; 
   border-radius: 4px; text-transform: uppercase; 
   box-shadow: 0 4px 0 rgba(0,0,0,0.1); border: 2px solid #ccc;

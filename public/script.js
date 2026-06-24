@@ -6,6 +6,13 @@ let currentAnswerLength = 0;
 let row = 0; let col = 0; let score = 0;
 let isMyTurnActive = false;
 
+// Variabel Tambahan Mode Solo & Multiplayer Discover Mandiri
+let allQuizzes = [];
+let isSoloMode = false;
+let soloQuestions = [];
+let soloCurrentIndex = 0;
+let selectedDiscoverQuizId = "";
+
 function showScreen(screenId) {
   document.querySelectorAll('.fullscreen-container').forEach(el => el.classList.add('hidden'));
   document.getElementById(screenId).classList.remove('hidden');
@@ -19,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function goToHome() { window.location.reload(); }
 
 // ==========================================
-// MENTOR / HOST
+// MENTOR / HOST LOGIC
 // ==========================================
 document.getElementById("btnHost").addEventListener("click", () => {
   let mentorID = document.getElementById("inputMentorID").value.trim().toLowerCase();
@@ -33,15 +40,36 @@ socket.on('roomCreated', (roomCode) => {
   document.getElementById("generatedRoomCode").innerText = roomCode;
 });
 
+// Update Daftar Player (Kompatibel untuk Lobby Mentor & Lobby Siswa Host)
 socket.on('updatePlayerList', (players) => {
-  document.getElementById("playerCount").innerText = players.length;
+  // 1. Jika di Layar Lobby Mentor
+  const mentorCount = document.getElementById("playerCount");
+  if (mentorCount) mentorCount.innerText = players.length;
   const list = document.getElementById("playerList");
-  list.innerHTML = "";
-  players.forEach(p => {
-    let span = document.createElement("span");
-    span.className = "player-tag"; span.innerText = p; list.appendChild(span);
-  });
-  if (players.length > 0) document.getElementById("mentorOptions").classList.remove("hidden");
+  if (list) {
+    list.innerHTML = "";
+    players.forEach(p => {
+      let span = document.createElement("span");
+      span.className = "player-tag"; span.innerText = p; list.appendChild(span);
+    });
+  }
+  if (players.length > 0 && document.getElementById("mentorOptions")) {
+    document.getElementById("mentorOptions").classList.remove("hidden");
+  }
+
+  // 2. Jika di Layar Lobby Multiplayer Mandiri Siswa
+  const studentCount = document.getElementById("studentPlayerCount");
+  if (studentCount) studentCount.innerText = players.length;
+  const studentList = document.getElementById("studentHostPlayerList");
+  if (studentList) {
+    studentList.innerHTML = "";
+    players.forEach(p => {
+      let span = document.createElement("span");
+      span.className = "player-tag"; 
+      span.innerText = (p === myPlayerName) ? `${p} (Host Anda)` : p; 
+      studentList.appendChild(span);
+    });
+  }
 });
 
 document.getElementById("btnStartPlay").addEventListener("click", () => {
@@ -69,7 +97,7 @@ socket.on('liveLeaderboardUpdate', (players) => {
 });
 
 // ==========================================
-// SISWA / PLAYER MULTIPLAYER
+// STUDENT / PLAYER LOGIC
 // ==========================================
 document.getElementById("btnEnterRoom").addEventListener("click", () => {
   let roomCode = document.getElementById("inputRoomCode").value.toUpperCase().trim();
@@ -98,6 +126,7 @@ socket.on('joinError', (msg) => { alert(msg); goToHome(); });
 socket.on('nextQuestion', ({ questionText, length, index, total, playersData }) => {
   document.getElementById("message").innerText = ""; 
   
+  // Jika ini mentor (tidak punya nama player), tampilkan layar monitor
   if (currentRoomCode && !myPlayerName) {
     showScreen("mentorMonitorScreen");
     document.getElementById("monitorProgress").innerText = `${index}/${total}`;
@@ -105,6 +134,7 @@ socket.on('nextQuestion', ({ questionText, length, index, total, playersData }) 
     return;
   }
 
+  // Jika ini siswa (baik host mandiri ataupun teman), langsung masuk game board
   showScreen("gameScreen");
   document.getElementById("question").innerText = questionText;
   currentAnswerLength = length;
@@ -197,7 +227,8 @@ function processGuessResult(result, isCorrect, guess) {
 
   for (let i = 0; i < result.length; i++) {
     setTimeout(() => {
-      boxes[i].classList.add("flip"); boxes[i].classList.add(result[i]);
+      boxes[i].classList.add("flip"); 
+      boxes[i].classList.add(result[i]);
       updateKeyboardColor(guess[i], result[i]);
     }, i * 150);
   }
@@ -215,7 +246,8 @@ function processGuessResult(result, isCorrect, guess) {
     } else {
       row++; col = 0;
       if (row === 3) {
-        showMessage("KESEMPATAN HABIS!", "#e21b3c");
+        let correctAns = isSoloMode ? soloQuestions[soloCurrentIndex].a : "ANDA KALAH";
+        showMessage(`KESEMPATAN HABIS! KUNCI: ${correctAns}`, "#e21b3c");
         if (!isSoloMode) socket.emit('updateScore', { roomCode: currentRoomCode, points: 0 });
         else setTimeout(() => { soloCurrentIndex++; nextSoloQuestion(); }, 2000);
       } else {
@@ -231,7 +263,7 @@ function showMessage(text, color) {
 }
 
 // ==========================================
-// PODIUM AKHIR
+// PODIUM / END GAME
 // ==========================================
 socket.on('gameOver', (finalStandings) => {
   showScreen("leaderboardScreen");
@@ -239,7 +271,7 @@ socket.on('gameOver', (finalStandings) => {
   flb.innerHTML = "";
   finalStandings.forEach((p, idx) => {
     let div = document.createElement("div"); div.className = "live-player";
-    let rank = idx === 0 ? "Juara 1" : idx === 1 ? "Juara 2" : idx === 2 ? "Juara 3" : `Peringkat ${idx+1}`;
+    let rank = idx === 0 ? "Juara 1 🥇" : idx === 1 ? "Juara 2 🥈" : idx === 2 ? "Juara 3 🥉" : `Peringkat ${idx+1}`;
     div.innerHTML = `<span>${rank}: ${p.name}</span> <span>${p.score} Pts</span>`;
     flb.appendChild(div);
   });
@@ -285,13 +317,8 @@ function resetKeyboardColors() {
 }
 
 // ==========================================
-// FITUR DISCOVER & MAIN SOLO
+// FITUR DISCOVER & LOGIKA BERMAIN
 // ==========================================
-let allQuizzes = [];
-let isSoloMode = false;
-let soloQuestions = [];
-let soloCurrentIndex = 0;
-
 async function openDiscover() {
   showScreen('discoverScreen');
   const res = await fetch('/api/discover');
@@ -309,7 +336,10 @@ function renderQuizzes(quizzes) {
       <span class="category-badge">${quiz.category}</span>
       <h3>${quiz.title}</h3>
       <p>Oleh: <strong>${quiz.author}</strong> | ${quiz.questions.length} Soal</p>
-      <button class="kahoot-btn btn-black small-btn" style="margin-top:15px;" onclick="playSolo('${quiz.id}')">Main Solo</button>
+      <div style="display:flex; gap:5px; margin-top:15px;">
+        <button class="kahoot-btn btn-black small-btn" style="flex:1;" onclick="playSolo('${quiz.id}')">Main Solo</button>
+        <button class="kahoot-btn btn-blue small-btn" style="flex:1;" onclick="openDiscoverHost('${quiz.id}')">Main Bareng</button>
+      </div>
     `;
     container.appendChild(card);
   });
@@ -324,6 +354,7 @@ function filterQuizzes() {
   renderQuizzes(filtered);
 }
 
+// MODE A: Main Solo Mandiri
 function playSolo(quizId) {
   const quiz = allQuizzes.find(q => q.id === quizId);
   if (!quiz) return;
@@ -341,7 +372,7 @@ function playSolo(quizId) {
 
 function nextSoloQuestion() {
   if (soloCurrentIndex >= soloQuestions.length) {
-    alert("Latihan selesai! Skor Akhir: " + score);
+    alert("Latihan selesai! Skor Akhir Anda: " + score);
     return goToHome();
   }
   const q = soloQuestions[soloCurrentIndex];
@@ -352,3 +383,44 @@ function nextSoloQuestion() {
   createBoard(currentAnswerLength);
   isMyTurnActive = true;
 }
+
+// MODE B: Main Bareng Multiplayer Mandiri (Tanpa Mentor)
+function openDiscoverHost(quizId) {
+  selectedDiscoverQuizId = quizId;
+  const quiz = allQuizzes.find(q => q.id === quizId);
+  if(quiz) {
+    document.getElementById("discoverQuizTitle").innerText = `Kuis: "${quiz.title}"`;
+    document.getElementById("inputDiscoverHostName").value = "";
+    showScreen("discoverHostScreen");
+  }
+}
+
+document.getElementById("btnCreateDiscoverRoom").addEventListener("click", () => {
+  let playerName = document.getElementById("inputDiscoverHostName").value.toUpperCase().trim();
+  if (playerName.length < 2) return alert("Nickname minimal 2 karakter!");
+  
+  myPlayerName = playerName;
+  isSoloMode = false;
+  score = 0;
+  document.getElementById("score").innerText = score;
+  
+  socket.emit('createDiscoverRoom', { quizId: selectedDiscoverQuizId, playerName });
+});
+
+socket.on('discoverRoomCreated', ({ roomCode, playerName, quizTitle }) => {
+  currentRoomCode = roomCode;
+  showScreen("studentHostLobby");
+  
+  document.getElementById("studentRoomCode").innerText = roomCode;
+  document.getElementById("studentHostQuizTitle").innerText = quizTitle;
+  document.getElementById("gamePlayerName").innerText = playerName;
+  
+  // Set inisialisasi awal jumlah orang di lobby mandiri (baru ada host sendiri)
+  document.getElementById("studentPlayerCount").innerText = "1";
+  const list = document.getElementById("studentHostPlayerList");
+  list.innerHTML = `<span class="player-tag">${playerName} (Host Anda)</span>`;
+});
+
+document.getElementById("btnStartStudentPlay").addEventListener("click", () => {
+  socket.emit('startDiscoverGame', currentRoomCode);
+});
