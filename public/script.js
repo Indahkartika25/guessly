@@ -6,6 +6,7 @@ let currentAnswerLength = 0;
 let row = 0; let col = 0; let score = 0;
 let isMyTurnActive = false;
 
+// Variabel Discover & Solo
 let allQuizzes = [];
 let isSoloMode = false;
 let soloQuestions = [];
@@ -18,14 +19,22 @@ function showScreen(screenId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => showScreen("homeScreen"), 1500);
+  setTimeout(() => showScreen("homeScreen"), 1500); // Splash screen
   initKeyboard();
 });
 
 function goToHome() { window.location.reload(); }
 
+// Konfirmasi keluar game di tengah jalan
+function confirmLeaveGame() {
+  const yakin = confirm("Apakah Anda yakin ingin meninggalkan permainan yang sedang berlangsung?");
+  if (yakin) {
+    goToHome();
+  }
+}
+
 // ==========================================
-// MENTOR / HOST LOGIC (UPGRADED WITH SELECTION)
+// HOST / MENTOR LOGIC
 // ==========================================
 document.getElementById("btnCheckMentor").addEventListener("click", async () => {
   let mentorID = document.getElementById("inputMentorID").value.trim().toLowerCase();
@@ -34,7 +43,6 @@ document.getElementById("btnCheckMentor").addEventListener("click", async () => 
   try {
     const resPrivat = await fetch(`/api/questions/${encodeURIComponent(mentorID)}`);
     const privateQuestions = await resPrivat.json();
-    
     const resPublik = await fetch(`/api/publish/history/${encodeURIComponent(mentorID)}`);
     const publicQuizzes = await resPublik.json();
     
@@ -47,8 +55,7 @@ document.getElementById("btnCheckMentor").addEventListener("click", async () => 
     selectEl.appendChild(optPrivate);
     
     publicQuizzes.forEach(quiz => {
-      let opt = document.createElement("option");
-      opt.value = quiz.id;
+      let opt = document.createElement("option"); opt.value = quiz.id;
       opt.innerText = `📢 [Discover] ${quiz.title} (${quiz.questions.length} soal)`;
       selectEl.appendChild(opt);
     });
@@ -81,34 +88,28 @@ socket.on('updatePlayerList', (players) => {
   if (list) {
     list.innerHTML = "";
     players.forEach(p => {
-      let span = document.createElement("span");
-      span.className = "player-tag"; span.innerText = p; list.appendChild(span);
+      let span = document.createElement("span"); span.className = "player-tag"; span.innerText = p; list.appendChild(span);
     });
   }
   if (players.length > 0 && document.getElementById("mentorOptions")) {
     document.getElementById("mentorOptions").classList.remove("hidden");
   }
 
+  // Update lobby student (discover multiplayer)
   const studentCount = document.getElementById("studentPlayerCount");
   if (studentCount) studentCount.innerText = players.length;
   const studentList = document.getElementById("studentHostPlayerList");
   if (studentList) {
     studentList.innerHTML = "";
     players.forEach(p => {
-      let span = document.createElement("span");
-      span.className = "player-tag"; 
-      span.innerText = (p === myPlayerName) ? `${p} (Host Anda)` : p; 
-      studentList.appendChild(span);
+      let span = document.createElement("span"); span.className = "player-tag"; 
+      span.innerText = (p === myPlayerName) ? `${p} (Host Anda)` : p; studentList.appendChild(span);
     });
   }
 });
 
 document.getElementById("btnStartPlay").addEventListener("click", () => {
   socket.emit('startGame', currentRoomCode);
-});
-
-socket.on('errorMsg', (msg) => {
-  document.getElementById("mentorErrorMsg").innerText = msg;
 });
 
 function renderLiveLeaderboard(players) {
@@ -133,11 +134,7 @@ socket.on('liveLeaderboardUpdate', (players) => {
 document.getElementById("btnEnterRoom").addEventListener("click", () => {
   let roomCode = document.getElementById("inputRoomCode").value.toUpperCase().trim();
   let playerName = document.getElementById("inputPlayerName").value.toUpperCase().trim();
-  
-  if (!roomCode || playerName.length < 2) {
-    document.getElementById("joinError").innerText = "Isi PIN dan Nickname!";
-    return;
-  }
+  if (!roomCode || playerName.length < 2) return alert("Isi PIN dan Nickname!");
   myPlayerName = playerName;
   socket.emit('joinRoom', { roomCode, playerName });
 });
@@ -146,17 +143,18 @@ socket.on('joinSuccess', ({ roomCode, playerName }) => {
   currentRoomCode = roomCode; 
   showScreen("studentWaiting");
   document.getElementById("displayName").innerText = playerName;
-  document.getElementById("gamePlayerName").innerText = playerName;
+  document.getElementById("score").innerText = "0";
 });
 
 socket.on('joinError', (msg) => { alert(msg); goToHome(); });
 
 // ==========================================
-// GAMEPLAY ENGINE
+// GAMEPLAY ENGINE (PAPAN WORDLE)
 // ==========================================
 socket.on('nextQuestion', ({ questionText, length, index, total, playersData }) => {
   document.getElementById("message").innerText = ""; 
   
+  // Jika ini mentor
   if (currentRoomCode && !myPlayerName) {
     showScreen("mentorMonitorScreen");
     document.getElementById("monitorProgress").innerText = `${index}/${total}`;
@@ -164,6 +162,7 @@ socket.on('nextQuestion', ({ questionText, length, index, total, playersData }) 
     return;
   }
 
+  // Jika pemain
   showScreen("gameScreen");
   document.getElementById("question").innerText = questionText;
   currentAnswerLength = length;
@@ -172,30 +171,23 @@ socket.on('nextQuestion', ({ questionText, length, index, total, playersData }) 
 });
 
 socket.on('timerUpdate', (time) => {
-  if (currentRoomCode && !myPlayerName) {
-    document.getElementById("monitorTimer").innerText = time;
-  } else if (myPlayerName) {
-    document.getElementById("studentTimer").innerText = time;
-  }
+  if (currentRoomCode && !myPlayerName) document.getElementById("monitorTimer").innerText = time;
+  else if (myPlayerName) document.getElementById("studentTimer").innerText = time;
 });
 
 socket.on('questionTimeout', (correctAnswer) => {
     isMyTurnActive = false;
-    let msgEl = document.getElementById("message");
-    if(msgEl.innerText === "") showMessage(`WAKTU HABIS! JAWABAN: ${correctAnswer}`, "#e21b3c");
+    if(document.getElementById("message").innerText === "") showMessage(`WAKTU HABIS! KUNCI: ${correctAnswer}`, "#e21b3c");
 });
 
 function createBoard(length) {
   const board = document.getElementById("board");
   board.innerHTML = ""; row = 0; col = 0;
   resetKeyboardColors();
-
   for (let i = 0; i < 3; i++) {
     let r = document.createElement("div"); r.className = "row";
     for (let j = 0; j < length; j++) {
-      let box = document.createElement("div"); 
-      box.className = "box"; 
-      r.appendChild(box);
+      let box = document.createElement("div"); box.className = "box"; r.appendChild(box);
     }
     board.appendChild(r);
   }
@@ -224,12 +216,7 @@ function checkGuess() {
   let boxes = rows[row].children;
   let guess = "";
   for (let i = 0; i < boxes.length; i++) guess += boxes[i].innerText;
-
-  if (guess.length !== currentAnswerLength) {
-      rows[row].classList.add("shake-row");
-      setTimeout(() => rows[row].classList.remove("shake-row"), 300);
-      return showMessage("Huruf belum lengkap!", "#e21b3c");
-  }
+  if (guess.length !== currentAnswerLength) return showMessage("Huruf belum lengkap!", "#e21b3c");
 
   isMyTurnActive = false;
 
@@ -244,9 +231,7 @@ function checkGuess() {
       processGuessResult(result, guess === answer, guess);
   } else {
       socket.emit('submitGuess', { roomCode: currentRoomCode, guess });
-      socket.once('guessResult', ({ result, isCorrect }) => {
-          processGuessResult(result, isCorrect, guess);
-      });
+      socket.once('guessResult', ({ result, isCorrect }) => { processGuessResult(result, isCorrect, guess); });
   }
 }
 
@@ -256,8 +241,7 @@ function processGuessResult(result, isCorrect, guess) {
 
   for (let i = 0; i < result.length; i++) {
     setTimeout(() => {
-      boxes[i].classList.add("flip"); 
-      boxes[i].classList.add(result[i]);
+      boxes[i].classList.add("flip"); boxes[i].classList.add(result[i]);
       updateKeyboardColor(guess[i], result[i]);
     }, i * 150);
   }
@@ -268,10 +252,8 @@ function processGuessResult(result, isCorrect, guess) {
       score += kalkulasiPoin;
       document.getElementById("score").innerText = score;
       showMessage("BENAR SEKALI!", "#26890c");
-      
       if (!isSoloMode) socket.emit('updateScore', { roomCode: currentRoomCode, points: kalkulasiPoin });
       else setTimeout(() => { soloCurrentIndex++; nextSoloQuestion(); }, 2000);
-      
     } else {
       row++; col = 0;
       if (row === 3) {
@@ -287,12 +269,11 @@ function processGuessResult(result, isCorrect, guess) {
 }
 
 function showMessage(text, color) {
-  let msg = document.getElementById("message");
-  msg.innerText = text; msg.style.color = color;
+  let msg = document.getElementById("message"); msg.innerText = text; msg.style.color = color;
 }
 
 // ==========================================
-// PODIUM / END GAME
+// PODIUM MULTIPLAYER (AKHIR PERMAINAN)
 // ==========================================
 socket.on('gameOver', (finalStandings) => {
   showScreen("leaderboardScreen");
@@ -346,24 +327,20 @@ function resetKeyboardColors() {
 }
 
 // ==========================================
-// FITUR DISCOVER & LOGIKA BERMAIN
+// FITUR DISCOVER, SOLO, DAN MULTIPLAYER MANDIRI
 // ==========================================
 async function openDiscover() {
   showScreen('discoverScreen');
   const res = await fetch('/api/discover');
-  allQuizzes = await res.json();
-  renderQuizzes(allQuizzes);
+  allQuizzes = await res.json(); renderQuizzes(allQuizzes);
 }
 
 function renderQuizzes(quizzes) {
-  const container = document.getElementById('quizList');
-  container.innerHTML = "";
+  const container = document.getElementById('quizList'); container.innerHTML = "";
   quizzes.forEach(quiz => {
-    let card = document.createElement('div');
-    card.className = "kahoot-card discover-card";
+    let card = document.createElement('div'); card.className = "kahoot-card discover-card";
     card.innerHTML = `
-      <span class="category-badge">${quiz.category}</span>
-      <h3>${quiz.title}</h3>
+      <span class="category-badge">${quiz.category}</span><h3>${quiz.title}</h3>
       <p>Oleh: <strong>${quiz.author}</strong> | ${quiz.questions.length} Soal</p>
       <div style="display:flex; gap:5px; margin-top:15px;">
         <button class="kahoot-btn btn-black small-btn" style="flex:1;" onclick="playSolo('${quiz.id}')">Main Solo</button>
@@ -376,32 +353,37 @@ function renderQuizzes(quizzes) {
 
 function filterQuizzes() {
   const keyword = document.getElementById('searchQuiz').value.toLowerCase();
-  const filtered = allQuizzes.filter(q => 
-    q.title.toLowerCase().includes(keyword) || 
-    q.category.toLowerCase().includes(keyword)
-  );
-  renderQuizzes(filtered);
+  renderQuizzes(allQuizzes.filter(q => q.title.toLowerCase().includes(keyword) || q.category.toLowerCase().includes(keyword)));
 }
 
+// Logika Mulai Latihan Solo
 function playSolo(quizId) {
   const quiz = allQuizzes.find(q => q.id === quizId);
   if (!quiz) return;
-  
   soloQuestions = [...quiz.questions].sort(() => Math.random() - 0.5);
-  soloCurrentIndex = 0;
-  isSoloMode = true;
-  score = 0;
+  soloCurrentIndex = 0; isSoloMode = true; score = 0;
   document.getElementById("score").innerText = score;
-  document.getElementById("gamePlayerName").innerText = "Mode Latihan";
-  document.getElementById("message").innerText = ""; 
-  
   nextSoloQuestion();
 }
 
+// Lanjut Soal Solo atau ke Podium Solo
 function nextSoloQuestion() {
   if (soloCurrentIndex >= soloQuestions.length) {
-    alert("Latihan selesai! Skor Akhir Anda: " + score);
-    return goToHome();
+    showScreen("leaderboardScreen");
+    const flb = document.getElementById("finalLeaderboardList");
+    flb.innerHTML = "";
+    let div = document.createElement("div"); 
+    div.className = "live-player"; 
+    div.style.flexDirection = "column"; 
+    div.style.alignItems = "center"; 
+    div.style.gap = "10px";
+    div.innerHTML = `
+      <h2 style="margin:0; color:#333;">Latihan Selesai! 🎉</h2>
+      <span style="font-size: 1.1rem;">🏅 Pemain: <strong>Mode Solo</strong></span> 
+      <span style="font-size: 1.6rem; font-weight: bold; color: #26890c;">${score} Pts</span>
+    `;
+    flb.appendChild(div);
+    return;
   }
   const q = soloQuestions[soloCurrentIndex];
   showScreen("gameScreen");
@@ -412,6 +394,7 @@ function nextSoloQuestion() {
   isMyTurnActive = true;
 }
 
+// Logika Mulai Room Multiplayer Tanpa Mentor
 function openDiscoverHost(quizId) {
   selectedDiscoverQuizId = quizId;
   const quiz = allQuizzes.find(q => q.id === quizId);
@@ -425,26 +408,17 @@ function openDiscoverHost(quizId) {
 document.getElementById("btnCreateDiscoverRoom").addEventListener("click", () => {
   let playerName = document.getElementById("inputDiscoverHostName").value.toUpperCase().trim();
   if (playerName.length < 2) return alert("Nickname minimal 2 karakter!");
-  
-  myPlayerName = playerName;
-  isSoloMode = false;
-  score = 0;
+  myPlayerName = playerName; isSoloMode = false; score = 0;
   document.getElementById("score").innerText = score;
-  
   socket.emit('createDiscoverRoom', { quizId: selectedDiscoverQuizId, playerName });
 });
 
 socket.on('discoverRoomCreated', ({ roomCode, playerName, quizTitle }) => {
-  currentRoomCode = roomCode;
-  showScreen("studentHostLobby");
-  
+  currentRoomCode = roomCode; showScreen("studentHostLobby");
   document.getElementById("studentRoomCode").innerText = roomCode;
   document.getElementById("studentHostQuizTitle").innerText = quizTitle;
-  document.getElementById("gamePlayerName").innerText = playerName;
-  
   document.getElementById("studentPlayerCount").innerText = "1";
-  const list = document.getElementById("studentHostPlayerList");
-  list.innerHTML = `<span class="player-tag">${playerName} (Host Anda)</span>`;
+  document.getElementById("studentHostPlayerList").innerHTML = `<span class="player-tag">${playerName} (Host Anda)</span>`;
 });
 
 document.getElementById("btnStartStudentPlay").addEventListener("click", () => {

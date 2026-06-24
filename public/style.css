@@ -184,3 +184,45 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
   .key { padding: 12px 2px; font-size: 0.85rem; }
   .key.wide-key { font-size: 0.7rem; }
 }
+
+/* SENSITIVITAS & UKURAN LAYOUT KEYBOARD SMARTPHONE */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.key-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.key {
+  flex: 1;
+  padding: 16px 8px; /* Area sentuhan jari diperluas */
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  background-color: #d3d6da;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+  /* Kunci Utama Menghilangkan Delay Ketik Browser Mobile: */
+  touch-action: manipulation; 
+  -webkit-tap-highlight-color: transparent;
+}
+
+.key:active {
+  transform: scale(0.95);
+  background-color: #bbb;
+}
+
+.wide-key {
+  flex: 1.5;
+  font-size: 0.9rem;
+}
