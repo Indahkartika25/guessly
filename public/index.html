@@ -7,20 +7,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+  
   <div id="introScreen" class="fullscreen-container bg-purple">
-    <h1 class="logo-text pulsing">Guessly</h1>
+    <img src="logoremovebackground.png" class="logo-splash" alt="Guessly">
   </div>
 
   <div id="homeScreen" class="fullscreen-container bg-purple hidden">
-    <h1 class="logo-text">Guessly</h1>
+    <div class="logo-wrapper">
+    <img src="logoremovebackground.png" class="logo-img" alt="Guessly">
+</div>
     <div class="kahoot-card">
-      <button onclick="showScreen('mentorLoginScreen')" class="kahoot-btn btn-blue">Host Game (Guru)</button>
-      <button onclick="showScreen('studentJoinScreen')" class="kahoot-btn btn-red">Join Game</button>
-      <button onclick="openDiscover()" class="kahoot-btn btn-green" style="margin-top: 10px;">Discover & Latihan</button>
+      <button onclick="showScreen('mentorLoginScreen')" class="kahoot-btn btn-blue">Buat Room</button>
+      <button onclick="showScreen('studentJoinScreen')" class="kahoot-btn btn-red">Join Room</button>
+      <button onclick="openDiscover()" class="kahoot-btn btn-green"">Discover & Latihan</button>
     </div>
     <div class="bottom-links">
-      <a href="admin.html" class="text-link" style="display:block; text-align:center;">Panel Soal Mentor</a>
+      <button class="kahoot-btn btn-blue mentor-panel-btn"
+              onclick="window.location.href='admin.html'">
+          Panel Soal Mentor
+      </button>
     </div>
   </div>
 
@@ -44,7 +49,10 @@
       <button id="btnCreateDiscoverRoom" class="kahoot-btn btn-blue">Buat Room</button>
     </div>
     <div class="bottom-links">
-      <button class="text-link" onclick="showScreen('discoverScreen')">Kembali</button>
+    <button class="kahoot-btn btn-blue mentor-panel-btn"
+            onclick="window.location.href='admin.html'">
+        📚 Panel Soal Mentor
+    </button>
     </div>
   </div>
 
@@ -65,7 +73,7 @@
   </div>
 
   <div id="mentorLoginScreen" class="fullscreen-container bg-purple hidden">
-    <h1 class="logo-text">Host Game</h1>
+    <h1 class="logo-text">Host Room</h1>
     <div class="kahoot-card">
       <div id="mentorAuthStage">
         <input type="text" id="inputMentorID" placeholder="Username Mentor" autocomplete="off">
@@ -79,7 +87,7 @@
       <p id="hostError" class="error-text"></p>
     </div>
     <div class="bottom-links">
-      <button class="text-link" onclick="goToHome()">Kembali</button>
+      <button class="back-btn" onclick="goToHome()">Kembali</button>
     </div>
   </div>
 
@@ -110,7 +118,7 @@
   </div>
 
   <div id="studentJoinScreen" class="fullscreen-container bg-purple hidden">
-    <h1 class="logo-text">Join Game</h1>
+    <h1 class="logo-text">Join Room</h1>
     <div class="kahoot-card">
       <input type="text" id="inputRoomCode" placeholder="Game PIN" maxlength="6" autocomplete="off">
       <input type="text" id="inputPlayerName" placeholder="Nickname" maxlength="12" autocomplete="off">
@@ -118,7 +126,7 @@
       <p id="joinError" class="error-text"></p>
     </div>
     <div class="bottom-links">
-      <button class="text-link" onclick="goToHome()">Kembali</button>
+      <button class="back-btn" onclick="goToHome()">Kembali</button>
     </div>
   </div>
 
@@ -150,7 +158,9 @@
     </div>
   </div>
 
+  </body>
+  <div class="floating-letters"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
-</body>
+  </body>
 </html>

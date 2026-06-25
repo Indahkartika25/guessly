@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap');
 
 body {
   margin: 0;
@@ -8,11 +9,48 @@ body {
 }
 
 .hidden { display: none !important; }
-.bg-purple { background-color: #46178f; }
+.bg-purple{
+    background:
+    linear-gradient(
+        135deg,
+        #A20134,
+        #D00143,
+        #FE2F70
+    );
+}
+.bg-light{
+    background:
+    linear-gradient(
+        135deg,
+        #A20134,
+        #D00143,
+        #FE2F70
+    );
+}
+.bg-purple:after{
+    content:"";
+
+    position:absolute;
+
+    width:500px;
+    height:500px;
+
+    border-radius:50%;
+
+    background:
+        rgba(255,255,255,.08);
+
+    top:-200px;
+    right:-150px;
+
+    filter:blur(80px);
+}
 .bg-light { background-color: #f2f2f2; }
 .bg-green { background-color: #26890c; color: white; }
 
 .fullscreen-container {
+  position:relative;
+  overflow:hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -33,42 +71,139 @@ body {
 .pulsing { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-.kahoot-card {
-  background: white; padding: 24px; border-radius: 4px;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.1); width: 100%; max-width: 400px;
-  display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;
-}
-.kahoot-card.wide { max-width: 600px; }
+.kahoot-card{
+    
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter: blur(20px);
 
-input[type="text"] {
-  width: 100%; padding: 18px; border: 2px solid #ccc; border-radius: 4px;
-  font-size: 1.1rem; font-weight: 700; text-align: center; font-family: inherit; box-sizing: border-box;
+    border-radius:32px;
+
+    padding:40px;
+
+    width:100%;
+    max-width:600px;
+
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.15);
+
+    border:1px solid rgba(255,255,255,.4);
+
+    transition:.3s;
+    
 }
-input[type="text"]:focus { outline: none; border-color: #46178f; }
+.kahoot-card:hover{
+    transform:translateY(-5px);
+}
+.kahoot-card.wide { max-width: 520px; }
+
+input[type="text"]{
+    width:100%;
+    height:65px;
+
+    padding:0 20px;
+
+    border:2px solid #ff8ab6;
+
+    border-radius:18px;
+
+    background:linear-gradient(
+    135deg,
+    #fff5fa,
+    #ffe3ef);
+
+    font-size:1.1rem;
+
+    font-weight:700;
+
+    text-align:center;
+
+    box-sizing:border-box;
+
+    transition:.3s;
+}
+
+input::placeholder{
+    color:#6b7280;
+
+    font-family:'Fredoka', sans-serif;
+
+    font-size:1.15rem;
+
+    font-weight:600;
+
+    letter-spacing:.5px;
+}
+
+input[type="text"]:focus { outline: none; box-shadow:0 0 0 4px rgba(142,68,255,.25); background:white; border-color: #46178f; }
 
 .kahoot-btn {
   width: 100%; padding: 18px; border: none; border-radius: 4px;
   font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer;
   font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;
   text-transform: uppercase;
+  border-radius:16px;
+  letter-spacing:.5px;
+  transition:.2s;
+  height:65px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+    
 }
+.kahoot-btn:hover{
+    transform:translateY(-3px);
+}
+
 .kahoot-btn:active { transform: translateY(4px); box-shadow: 0 0 0 !important; }
 
 .btn-black { background: #333; box-shadow: 0 4px 0 #000; }
-.btn-blue  { background: #1368ce; box-shadow: 0 4px 0 #0c4284; }
-.btn-red   { background: #e21b3c; box-shadow: 0 4px 0 #8f1126; }
-.btn-green { background: #26890c; box-shadow: 0 4px 0 #165007; }
+.btn-blue{
+    background:
+    linear-gradient(
+        135deg,
+        #9649E2,
+        #9649E2
+    );
+
+    box-shadow:
+        0 6px 0 #442d7a;
+}
+.btn-red   { background: #D00143; box-shadow: 0 4px 0 #8f1126; }
+.btn-green{
+    background:
+    linear-gradient(
+        135deg,
+        #F9E400
+    );
+
+    color:#333;
+
+    box-shadow:
+        0 6px 0 #c29600;
+
+
+}
+
 .btn-grey  { background: #fff; color: #333; box-shadow: 0 4px 0 #ccc; border: 2px solid #ccc; }
 
-.small-btn { padding: 10px 15px; font-size: 0.9rem; width: auto; }
+.small-btn { padding: 5px 15px; font-size: 0.9rem; width: auto; }
 .text-link { background: none; border: none; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; font-size: 1rem; }
 .error-text { color: #e21b3c; text-align: center; font-weight: 700; margin: 0; min-height: 20px; }
 
 /* TOP BAR & LOBBY */
 .top-bar {
-  width: 100%; background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%; backdrop-filter:blur(12px); padding: 15px 30px;
   display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
   position: fixed; top: 0; left: 0; z-index: 10;
+}
+.top-bar h2{
+  color: white;
 }
 .pin-display { font-size: 1.5rem; font-weight: 800; }
 .pin-display span { font-size: 2.5rem; color: #333; letter-spacing: 2px; display: block;}
@@ -92,7 +227,7 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
 
 /* GAME SCREEN */
 .game-top-bar {
-  width: 100%; background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%; background:rgba(255,255,255,.85);backdrop-filter:blur(12px); padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
   position: fixed; top: 0; left: 0; z-index: 10;
 }
@@ -109,12 +244,26 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
   display: flex; justify-content: center; gap: 4px; width: 100%; 
   flex-wrap: wrap; 
 }
-.box {
-  width: 8vw; max-width: 45px; height: 8vw; max-height: 45px;
-  font-size: calc(1rem + 1vw); background: white; font-weight: 900;
-  display: flex; justify-content: center; align-items: center; 
-  border-radius: 4px; text-transform: uppercase; 
-  box-shadow: 0 4px 0 rgba(0,0,0,0.1); border: 2px solid #ccc;
+.box{
+  width:60px;
+  height:60px;
+
+  background:white;
+
+  border:3px solid #ddd;
+
+  border-radius:18px;
+
+  font-size:1.8rem;
+
+  font-weight:900;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  box-shadow:
+  0 5px 12px rgba(0,0,0,.08);
 }
 
 .box.flip { animation: flipBox 0.4s ease-in-out forwards; }
@@ -138,9 +287,19 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
 /* KEYBOARD */
 .keyboard { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 500px; margin-top: 10px; }
 .key-row { display: flex; justify-content: center; gap: 6px; }
-.key {
-  background-color: #f2f2f2; border: 2px solid #ccc; border-radius: 4px; font-weight: 800; font-size: 1.1rem;
-  padding: 14px 4px; cursor: pointer; flex: 1; text-transform: uppercase; box-shadow: 0 4px 0 #ccc; transition: all 0.1s;
+.key{
+  background:white;
+
+  border:none;
+
+  border-radius:14px;
+
+  font-weight:800;
+
+  box-shadow:
+  0 5px 10px rgba(0,0,0,.12);
+
+  transition:.2s;
 }
 .key:active { transform: translateY(4px); box-shadow: 0 0 0; }
 .key.wide-key { flex: 1.5; font-size: 0.9rem; }
@@ -166,7 +325,13 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
 
 /* DISCOVER UI */
 .quiz-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; }
-.discover-card { width: 100%; max-width: 320px; text-align: left; padding: 20px; }
+.discover-card { width: 100%; max-width: 320px; border-radius:24px; overflow: hidden; transition:.3s; text-align: left; padding: 20px; }
+.discover-card:hover{
+    transform:translateY(-8px);
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,.15);
+}
 .discover-card h3 { margin: 0 0 10px 0; color: #46178f; font-size: 1.3rem; }
 .discover-card p { margin: 5px 0; font-size: 0.95rem; color: #555; }
 .category-badge { display: inline-block; background: #f2f2f2; border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-bottom: 10px; }
@@ -206,7 +371,7 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
   padding: 16px 8px; /* Area sentuhan jari diperluas */
   font-size: 1.1rem;
   font-weight: bold;
-  border-radius: 6px;
+  border-radius: 10px;
   border: none;
   background-color: #d3d6da;
   color: #333;
@@ -225,4 +390,158 @@ input[type="text"]:focus { outline: none; border-color: #46178f; }
 .wide-key {
   flex: 1.5;
   font-size: 0.9rem;
+}
+.logo-wrapper{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.logo-img{
+    width:400px;
+    max-width:85vw;
+
+    filter:
+        drop-shadow(0 10px 25px rgba(0,0,0,.25));
+
+    margin-bottom:10px;
+}
+
+.logo-splash{
+    width:500px;
+    max-width:90vw;
+    animation:pulseLogo 2s infinite;
+}
+
+@keyframes pulseLogo{
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.05);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+}
+.floating-letters{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+}
+
+.floating-letter{
+    position:absolute;
+
+    font-family:'Fredoka', sans-serif;
+
+    font-size:65px;
+    font-weight:700;
+
+    color:rgba(255,255,255,.08);
+
+    text-shadow:
+        0 2px 0 rgba(255,255,255,.13),
+        0 4px 0 rgba(255,255,255,.12),
+        0 8px 16px rgba(0,0,0,.15);
+
+    animation:floatLetter 6s ease-in-out infinite;
+    filter:
+    blur(.3px)
+    drop-shadow(0 8px 10px rgba(0,0,0,.08));
+}
+
+
+@keyframes floatLetter{
+    0%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-15px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
+}
+
+
+.mentor-panel-btn{
+    width:auto;
+    min-width:240px;
+
+    margin-top:20px;
+
+    padding:14px 28px;
+
+    font-size:1rem;
+
+    border-radius:18px;
+}
+.mentor-panel-btn{
+    width:auto;
+    min-width:240px;
+
+    margin-top:20px;
+
+    padding:14px 28px;
+
+    font-size:1rem;
+
+    border-radius:18px;
+}
+.back-btn{
+    margin-top:20px;
+
+    padding:12px 28px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,.15);
+
+    backdrop-filter:blur(10px);
+
+    color:white;
+
+    font-family:'Fredoka', sans-serif;
+
+    font-size:1rem;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.back-btn:hover{
+    transform:translateY(-3px);
+
+    background:rgba(255,255,255,.25);
+}
+
+.back-btn:active{
+    transform:translateY(1px);
+}
+#mentorAuthStage{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+.mentor-hero{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.mentor-logo{
+    width:400px;
+    max-width:85vw;
+
+    margin-bottom:10px;
 }

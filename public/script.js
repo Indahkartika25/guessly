@@ -19,8 +19,11 @@ function showScreen(screenId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => showScreen("homeScreen"), 1500); // Splash screen
+  setTimeout(() => showScreen("homeScreen"), 1500);
+
   initKeyboard();
+
+  generateFloatingLetters();
 });
 
 function goToHome() { window.location.reload(); }
@@ -424,3 +427,57 @@ socket.on('discoverRoomCreated', ({ roomCode, playerName, quizTitle }) => {
 document.getElementById("btnStartStudentPlay").addEventListener("click", () => {
   socket.emit('startDiscoverGame', currentRoomCode);
 });
+function generateFloatingLetters(){
+
+    const container =
+    document.querySelector('.floating-letters');
+
+    const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ?!";
+
+    for(let i=0;i<40;i++){
+
+        const letter =
+        document.createElement('span');
+
+        letter.className =
+        "floating-letter";
+
+        letter.innerText =
+        chars[Math.floor(Math.random()*chars.length)];
+           const colors = [
+          "rgba(255,214,0,.10)",
+          "rgba(142,68,255,.10)",
+          "rgba(255,255,255,.08)"
+        ];
+
+        letter.style.color =
+        colors[Math.floor(Math.random()*colors.length)];
+
+        let x,y;
+
+        do{
+            x = Math.random()*100;
+            y = Math.random()*100;
+        }
+        while(
+            x > 25 && x < 75 &&
+            y > 15 && y < 70
+        );
+
+
+        letter.style.left = x + "%";
+        letter.style.top = y + "%";
+
+        letter.style.fontSize =
+        (35 + Math.random()*45) + "px";
+
+        letter.style.transform =
+        `rotate(${Math.random()*360}deg)`;
+
+        letter.style.animationDelay =
+        Math.random()*5 + "s";
+
+        container.appendChild(letter);
+    }
+}

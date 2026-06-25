@@ -7,20 +7,27 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
-
+  
   <div class="fullscreen-container bg-light">
     <div class="top-bar">
       <h2>Panel Mentor</h2>
       <a href="index.html" class="kahoot-btn btn-grey small-btn" style="text-decoration: none;">Ke Beranda</a>
     </div>
 
-    <div class="lobby-content" id="adminLoginPanel" style="margin-top: 100px;">
+    <div class="lobby-content" id="adminLoginPanel" style="margin-top: 20px;">
+      <img src="logoremovebackground.png"
+     class="mentor-logo"
+     alt="Guessly">
+
       <div class="kahoot-card">
         <h3>Login Data Mentor</h3>
         <input type="text" id="adminUsername" placeholder="Username Mentor">
-        <button id="btnLoadQuestions" class="kahoot-btn btn-blue">Akses Soal Saya</button>
+        <button id="btnLoadQuestions" class="kahoot-btn btn-blue">
+            Akses Soal Saya
+        </button>
       </div>
     </div>
+
 
     <div class="lobby-content wide hidden" id="adminDashboardPanel" style="margin-top: 100px;">
       <div class="player-count" style="margin-bottom: 20px;">
@@ -66,6 +73,8 @@
       </div>
     </div>
   </div>
+  
+  
 
   <script src="admin.js"></script>
 </body>
