@@ -19,4 +19,4 @@ Guessly adalah aplikasi kuis interaktif berbasis *real-time* yang menggabungkan 
 1. Pastikan Anda telah menginstal [Node.js](https://nodejs.org/).
 2. Clone repository ini:
    ```bash
-   git clone https://github.com/zurisey/guessly-app.git
+   git clone https://github.com/Indahkartika25/guessly-app.git
