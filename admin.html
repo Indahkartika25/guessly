@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Guessly</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+  
+  <div class="fullscreen-container bg-light">
+    <div class="top-bar">
+      <h2>Panel Mentor</h2>
+      <a href="index.html" class="kahoot-btn btn-grey small-btn" style="text-decoration: none;">Ke Beranda</a>
+    </div>
+
+    <div class="lobby-content" id="adminLoginPanel" style="margin-top: 20px;">
+      <img src="logoremovebackground.png"
+     class="mentor-logo"
+     alt="Guessly">
+
+      <div class="kahoot-card">
+        <h3>Login Data Mentor</h3>
+        <input type="text" id="adminUsername" placeholder="Username Mentor">
+        <button id="btnLoadQuestions" class="kahoot-btn btn-blue">
+            Akses Soal Saya
+        </button>
+      </div>
+    </div>
+
+
+    <div class="lobby-content wide hidden" id="adminDashboardPanel" style="margin-top: 100px;">
+      <div class="player-count" style="margin-bottom: 20px;">
+        Database milik: <span id="displayAdminUser"></span>
+      </div>
+
+      <!-- FITUR UPLOAD FILE TXT -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px;">
+        <h3>Upload Soal via .txt</h3>
+        <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Format per baris: <strong>Pertanyaan | Jawaban</strong></p>
+        <input type="file" id="fileTxt" accept=".txt" style="padding: 10px; border: 2px dashed #ccc; cursor: pointer; width: 100%; box-sizing: border-box;">
+        <button id="btnUploadTxt" class="kahoot-btn btn-blue" style="margin-top: 10px;">Upload File</button>
+      </div>
+
+      <!-- FITUR TAMBAH MANUAL -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px;">
+        <h3>Buat Soal Baru (Manual)</h3>
+        <input type="text" id="newQuestion" placeholder="Pertanyaan">
+        <input type="text" id="newAnswer" placeholder="Kunci Jawaban">
+        <button id="btnAddQuestion" class="kahoot-btn btn-green">Simpan ke Database</button>
+        <p id="adminError" class="error-text"></p>
+      </div>
+
+      <!-- FITUR PUBLISH KE DISCOVER -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px; border: 2px solid #46178f;">
+        <h3 style="color: #46178f;">Publish ke Discover (Public)</h3>
+        <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Jadikan kumpulan soalmu sebagai kuis publik agar bisa dimainkan semua orang di menu Discover!</p>
+        <input type="text" id="publishTitle" placeholder="Judul Kuis (misal: Latihan Sejarah Kelas 6)">
+        <input type="text" id="publishCategory" placeholder="Kategori (misal: Sejarah, IPA, Umum)">
+        <button id="btnPublish" class="kahoot-btn" style="margin-top: 10px; background: #46178f; box-shadow: 0 4px 0 #2a0b5c; color: white;">Publish Sekarang</button>
+      </div>
+
+      <!-- BAGIAN RIWAYAT PUBLISH MENTOR -->
+      <div class="kahoot-card wide" style="margin-bottom: 25px; border: 2px solid #1368ce;">
+        <h3 style="color: #1368ce;">Riwayat Publish Saya</h3>
+        <p style="font-size: 0.9rem; margin-top: 0; color: #555;">Daftar kuis Anda yang saat ini aktif di menu publik Discover.</p>
+        <ul id="publishHistoryList" class="admin-list"></ul>
+      </div>
+
+      <div class="kahoot-card wide">
+        <h3>Daftar Soal Saya (Bank Lokal)</h3>
+        <ul id="questionList" class="admin-list"></ul>
+      </div>
+    </div>
+  </div>
+  
+  
+
+  <script src="admin.js"></script>
+</body>
+</html>

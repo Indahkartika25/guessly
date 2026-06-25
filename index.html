@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Guessly - Kuis Interaktif</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div id="introScreen" class="fullscreen-container bg-purple">
+    <img src="logoremovebackground.png" class="logo-splash" alt="Guessly">
+  </div>
+
+  <div id="homeScreen" class="fullscreen-container bg-purple hidden">
+    <div class="logo-wrapper">
+    <img src="logoremovebackground.png" class="logo-img" alt="Guessly">
+</div>
+    <div class="kahoot-card">
+      <button onclick="showScreen('mentorLoginScreen')" class="kahoot-btn btn-blue">Buat Room</button>
+      <button onclick="showScreen('studentJoinScreen')" class="kahoot-btn btn-red">Join Room</button>
+      <button onclick="openDiscover()" class="kahoot-btn btn-green"">Discover & Latihan</button>
+    </div>
+    <div class="bottom-links">
+      <button class="kahoot-btn btn-blue mentor-panel-btn"
+              onclick="window.location.href='admin.html'">
+          Panel Soal Mentor
+      </button>
+    </div>
+  </div>
+
+  <div id="discoverScreen" class="fullscreen-container bg-light hidden">
+    <div class="top-bar">
+      <h2>Discover Quizzes</h2>
+      <button class="kahoot-btn btn-grey small-btn" onclick="goToHome()">Kembali</button>
+    </div>
+    <div class="lobby-content wide">
+      <input type="text" id="searchQuiz" placeholder="Cari Mata Pelajaran atau Judul..." onkeyup="filterQuizzes()" style="margin-bottom: 20px;">
+      <div id="quizList" class="quiz-grid"></div>
+    </div>
+  </div>
+
+  <div id="discoverHostScreen" class="fullscreen-container bg-purple hidden">
+    <h1 class="logo-text">Main Bareng</h1>
+    <div class="kahoot-card">
+      <h3>Host Kuis Discover</h3>
+      <p id="discoverQuizTitle" style="color:#46178f; text-align:center; font-weight:700; margin:0;"></p>
+      <input type="text" id="inputDiscoverHostName" placeholder="Nickname Kamu" maxlength="12" autocomplete="off">
+      <button id="btnCreateDiscoverRoom" class="kahoot-btn btn-blue">Buat Room</button>
+    </div>
+    <div class="bottom-links">
+    <button class="kahoot-btn btn-blue mentor-panel-btn"
+            onclick="window.location.href='admin.html'">
+        📚 Panel Soal Mentor
+    </button>
+    </div>
+  </div>
+
+  <div id="studentHostLobby" class="fullscreen-container bg-light hidden">
+    <div class="top-bar">
+      <div class="pin-display">Game PIN: <span id="studentRoomCode">---</span></div>
+      <button class="kahoot-btn btn-grey small-btn" onclick="goToHome()">Keluar</button>
+    </div>
+    <div class="lobby-content">
+      <h2 id="studentHostQuizTitle" style="color:#46178f; margin-bottom:5px;">Judul Kuis</h2>
+      <p style="color:#555; margin-top:0; font-weight:bold;">Bagikan PIN di atas agar temanmu bisa bergabung!</p>
+      <div class="player-count">Teman Terhubung: <span id="studentPlayerCount">0</span></div>
+      <div class="mentor-control">
+        <button id="btnStartStudentPlay" class="kahoot-btn btn-green">Mulai Game Sekarang</button>
+      </div>
+      <div id="studentHostPlayerList" class="player-list"></div>
+    </div>
+  </div>
+
+  <div id="mentorLoginScreen" class="fullscreen-container bg-purple hidden">
+    <h1 class="logo-text">Host Room</h1>
+    <div class="kahoot-card">
+      <div id="mentorAuthStage">
+        <input type="text" id="inputMentorID" placeholder="Username Mentor" autocomplete="off">
+        <button id="btnCheckMentor" class="kahoot-btn btn-blue">Cek Koleksi Soal</button>
+      </div>
+      <div id="mentorSelectStage" class="hidden" style="margin-top: 15px; text-align: left;">
+        <p style="margin: 5px 0; font-weight: bold; color: #333;">Pilih Kumpulan Soal Terpilih:</p>
+        <select id="selectQuizToHost" style="width: 100%; padding: 12px; font-size: 1rem; margin-bottom: 15px; border-radius: 6px; border: 2px solid #ccc; font-family: sans-serif;"></select>
+        <button id="btnHost" class="kahoot-btn btn-green">Buat Room & Buka Lobby</button>
+      </div>
+      <p id="hostError" class="error-text"></p>
+    </div>
+    <div class="bottom-links">
+      <button class="back-btn" onclick="goToHome()">Kembali</button>
+    </div>
+  </div>
+
+  <div id="mentorLobby" class="fullscreen-container bg-light hidden">
+    <div class="top-bar">
+      <div class="pin-display">Game PIN: <span id="generatedRoomCode">---</span></div>
+      <button class="kahoot-btn btn-grey small-btn" onclick="goToHome()">Keluar</button>
+    </div>
+    <div class="lobby-content">
+      <h2 id="mentorLobbyTitle" style="color:#46178f; margin-bottom:15px;">Kuis: Loading...</h2>
+      <div class="player-count">Pemain Terhubung: <span id="playerCount">0</span></div>
+      <div id="mentorOptions" class="hidden mentor-control">
+        <button id="btnStartPlay" class="kahoot-btn btn-green">Mulai Permainan</button>
+        <p id="mentorErrorMsg" class="error-text"></p>
+      </div>
+      <div id="playerList" class="player-list"></div>
+    </div>
+  </div>
+
+  <div id="mentorMonitorScreen" class="fullscreen-container bg-light hidden">
+    <div class="top-bar">
+      <div class="timer-badge circle-timer" id="monitorTimer">30</div>
+      <div class="question-progress">Soal <span id="monitorProgress">0/0</span></div>
+    </div>
+    <div class="lobby-content wide">
+      <div class="leaderboard-list" id="liveLeaderboard"></div>
+    </div>
+  </div>
+
+  <div id="studentJoinScreen" class="fullscreen-container bg-purple hidden">
+    <h1 class="logo-text">Join Room</h1>
+    <div class="kahoot-card">
+      <input type="text" id="inputRoomCode" placeholder="Game PIN" maxlength="6" autocomplete="off">
+      <input type="text" id="inputPlayerName" placeholder="Nickname" maxlength="12" autocomplete="off">
+      <button id="btnEnterRoom" class="kahoot-btn btn-black">Masuk</button>
+      <p id="joinError" class="error-text"></p>
+    </div>
+    <div class="bottom-links">
+      <button class="back-btn" onclick="goToHome()">Kembali</button>
+    </div>
+  </div>
+
+  <div id="studentWaiting" class="fullscreen-container bg-green hidden">
+    <h2 class="waiting-text">Anda sudah masuk!</h2>
+    <p class="waiting-subtext">Menunggu pembuat permainan memulai...</p>
+    <h1 class="player-nickname" id="displayName"></h1>
+  </div>
+
+  <div id="gameScreen" class="fullscreen-container bg-light hidden">
+    <div class="game-top-bar" style="display: flex; justify-content: space-between; align-items: center;">
+      <button class="kahoot-btn btn-grey small-btn" onclick="confirmLeaveGame()" style="margin: 0;">Keluar</button>
+      <div class="timer-badge circle-timer" id="studentTimer">30</div>
+      <div class="score-info">Skor: <span id="score">0</span></div>
+    </div>
+    <div class="game-content">
+      <h2 id="question" class="question-block">Menunggu soal...</h2>
+      <div id="board" class="board"></div>
+      <p id="message" class="feedback-msg"></p>
+      <div id="keyboard-container" class="keyboard"></div>
+    </div>
+  </div>
+
+  <div id="leaderboardScreen" class="fullscreen-container bg-purple hidden">
+    <h1 class="logo-text">Podium</h1>
+    <div class="kahoot-card wide">
+      <div class="leaderboard-list" id="finalLeaderboardList"></div>
+      <button class="kahoot-btn btn-blue" onclick="goToHome()">Selesai</button>
+    </div>
+  </div>
+
+  </body>
+  <div class="floating-letters"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+  </body>
+</html>
